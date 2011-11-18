@@ -1,0 +1,90 @@
+% Standard preamble %
+\documentclass[a4paper]{article}
+\usepackage{graphicx,hyperref,amsmath,amsfonts,bm,url,algorithmic}
+\usepackage[portuges]{babel}
+\usepackage[a4paper,text={16.5cm,25.2cm},centering]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[retainorgcmds]{IEEEtrantools}
+
+\setcounter{tocdepth}{2}
+\setlength{\parskip}{1.2ex}
+\setlength{\parindent}{0em}
+
+\clubpenalty = 10000
+\widowpenalty = 10000
+
+\title{Knapsack}
+\date{Novembro de 2011}
+\author{Thiago Rafael Becker}
+
+\begin{document}
+\maketitle
+\section*{Introdução}
+{\it Definição do problema.}O problema, em sua forma original, é definido como: {\it Dado um conjunto de itens, cada um com um peso e um valor, como encher uma mochila como tal que o 	peso total não ultrapasse o limite de peso da mochila, e o valor total seja o maior possível.}
+
+{\it Importância do problema.} Problemas similares aparecem em economia (alocação de recursos com limitação financeira, busca de estratégias com limitação de risco), combinatória, matemática aplicada, logística ({\it bin packing}), criptografia ({\it subset sum problem}), corte de materiais com despedício mínimo, .
+
+{\it Problema de decisão}. O problema, como proposto, não serve para a análise de sua complexidade, pois não é um problema de decisão. Para torná-lo um problema de decisão, estabelecemos um limite mínimo $V$ ao valor máximo dos itens na mochila, levando ao seguinte problema de decisão: {\it Dado um conjunto de $n$ itens $I$, cada um com um peso $p_i$ e um valor $v_i$ ($i \in I$), é possível encher uma mochila de forma que o peso total do itens não ultrapasse o limite de peso $P$ e o valor total seja pelo menos $V$.}
+
+Existem diversas variações do problema, mas vamos nos focar nas duas abaixo.
+
+{\it Knapsack-0,1.} Este problema surge quando os itens são indivisíveis. Este problema é NP-Completo fraco.
+
+{\it Knapsack fracionário.} Este problema surge quando os itens podem ser divididos em parte fracionárias e pode ser resolvido eficientemente por uma estratégia gulosa.
+
+\section*{Knapsack-0,1}
+Com o problema de decisão definido acima, podemos definir o problema como
+\[
+maximizar \sum_{i \in I} v_i
+\]
+restrito à
+\[
+\left(\sum_{i \in I} p_i\right) \le P
+\]
+
+tal que $\displaystyle\sum_{i \in I} v_i \ge V$.
+
+\subsection*{Solução por força bruta}
+Como existem $n$ itens, existem $2^n$ subconjuntos de $I$. O algoritmo iria procurar por cada um dos conjuntos de itens pela solução ótima, o que levaria a um problema de complexidade $O(2^n)$.
+
+[[Algoritmo aqui]]
+
+\subsection*{Solução em tempo pseudo-polinomial (programação dinâmica)}
+Uma solução em tempo pseudo-polinomial $O(nP)$ pode ser obtida por programação dinâmica.
+
+{\it Subproblema ótimo.}
+\[
+B[i,w] = \left\{
+\begin{IEEEeqnarraybox}[][c]{l?s}
+\IEEEstrut
+B[i-1,w] & se $p_i > w$\\
+max(B[k-1], B[k-1,w-p_i] + v_i)
+\IEEEstrut
+\end{IEEEeqnarraybox}
+\right.
+\]
+
+A resposta para o problema de decisão se encontrará na célula $B[n,P]$ da matriz resultante. Se $B[n,P] \ge V$, o problema está satisfeito.
+
+{\it Algoritmo.} O pseudo-código da solução encontra-se abaixo.
+\begin{algorithmic}
+\FOR{$i = 1 \to n$}
+ \FOR{$w = 0 \to P$}
+  \IF{$p_i \le w$}
+   \IF{$v_i + B[i-1,w-p_i] > B[i-1,w]$}
+    \STATE $B[i,w] = v_i + B[i-1,w-p_i]$
+   \ELSE
+    \STATE $B[i,w] = B[i-1,w]$
+   \ENDIF
+  \ELSE 
+   \STATE $B[i,w] = B[i-1,w]$
+  \ENDIF
+ \ENDFOR
+\ENDFOR
+
+{\bf return} $B[n,P]$
+\end{algorithmic}
+
+\section*{Knapsack fracionário.}
+Este problema pode ser resolvido dividindo-se o valor total de cada item pelo seu peso, obtendo-se o valor por unidade de peso do item $\rho_i$. Após isso, a prenchimento da mochila ocorre usando-se o itens em ordem decrescente de valor $\rho_i$.
+\end{document}
