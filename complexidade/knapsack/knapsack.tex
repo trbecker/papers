@@ -10,6 +10,10 @@
 \setlength{\parskip}{1.2ex}
 \setlength{\parindent}{0em}
 
+\newcommand{\ks}{problema da mochila}
+\newcommand{\Ks}{Problema da mochila}
+\newcommand{\NPC}{NP-Completo}
+
 \clubpenalty = 10000
 \widowpenalty = 10000
 
@@ -33,16 +37,16 @@ Existem diversas variações do problema, mas vamos nos focar nas duas abaixo.
 {\it Knapsack fracionário.} Este problema surge quando os itens podem ser divididos em parte fracionárias e pode ser resolvido eficientemente por uma estratégia gulosa.
 
 \section*{Knapsack-0,1}
-Com o problema de decisão definido acima, podemos definir o problema como
-\[
-maximizar \sum_{i \in I} v_i
-\]
-restrito à
-\[
-\left(\sum_{i \in I} p_i\right) \le P
-\]
+Com o problema de decisão definido acima, podemos definir o problema com as seguintes restrições
+\begin{equation}
+\label{restricao:1}
+\left(\sum_{i \in I} v_i\right) \ge V
+\end{equation}
 
-tal que $\displaystyle\sum_{i \in I} v_i \ge V$.
+\begin{equation}
+\label{restricao:2}
+\left(\sum_{i \in I} p_i\right) \le P
+\end{equation}
 
 \subsection*{Solução por força bruta}
 Como existem $n$ itens, existem $2^n$ subconjuntos de $I$. O algoritmo iria procurar por cada um dos conjuntos de itens pela solução ótima, o que levaria a um problema de complexidade $O(2^n)$.
@@ -50,15 +54,16 @@ Como existem $n$ itens, existem $2^n$ subconjuntos de $I$. O algoritmo iria proc
 [[Algoritmo aqui]]
 
 \subsection*{Solução em tempo pseudo-polinomial (programação dinâmica)}
-Uma solução em tempo pseudo-polinomial $O(nP)$ pode ser obtida por programação dinâmica.
+Por programação dinâmica, é possível obter uma solução de complesidade $O(nP)$.
 
-{\it Subproblema ótimo.}
+{\it Subestrutura ótima.}
+
 \[
 B[i,w] = \left\{
 \begin{IEEEeqnarraybox}[][c]{l?s}
 \IEEEstrut
 B[i-1,w] & se $p_i > w$\\
-max(B[k-1], B[k-1,w-p_i] + v_i)
+max(B[i-1,w], B[i-1,w-p_i] + v_i)
 \IEEEstrut
 \end{IEEEeqnarraybox}
 \right.
@@ -84,6 +89,34 @@ A resposta para o problema de decisão se encontrará na célula $B[n,P]$ da mat
 
 {\bf return} $B[n,P]$
 \end{algorithmic}
+
+\subsection*{Complexidade do problema}
+A complexidade do algoritmo acima é $O(nP)$, na qual $n$ é a quantidade de elementos do conjunto de entrada, e $P$ é o peso máximo suportado pela mochila. É, portanto, pseudo-polinomial, pois não depende exclusivamente do tamanho do conjunto que compõe o preoblema.
+
+\subsection*{Prova da plenitude-NP}
+{\it Subset sum.} O problema {\it subset sum} será usado para provar que \ks é \NPC. O problema é proposto da seguinte maneira: dado um conjunto de inteiros $X$, existe um subconjunto $S$ de $X$ ($X$ incluso) tal que $\left(\sum S_i\right) = c$?
+
+{\it Caso especial de \ks.} O caso especial do \ks usado para a prova será tal que $P = V$ e $(\forall i \in I)(v_i=p_i)$. Com essa equivalencia, é possível transformar a restrição \ref{restricao:2} na seguinte restrição:
+\begin{equation}
+\label{restricao:3}
+\left(\sum_{i \in I} v_i\right) \le V
+\end{equation}
+
+e igualando as restrições \ref{restricao:2} e \ref{restricao:3} pelo somatório comum, chegamos a conclusão de que a restrição do caso especial é
+
+\begin{equation}
+\label{restricao:especial}
+\left(\sum_{i \in I} v_i\right) = V
+\end{equation}
+
+Analogamente,
+
+\begin{equation}
+\label{restricao:especial_analoga}
+\left(\sum_{i \in I} p_i\right) = P
+\end{equation}
+
+Este problema é equivalente ao problema de {\it subset sum}.
 
 \section*{Knapsack fracionário.}
 Este problema pode ser resolvido dividindo-se o valor total de cada item pelo seu peso, obtendo-se o valor por unidade de peso do item $\rho_i$. Após isso, a prenchimento da mochila ocorre usando-se o itens em ordem decrescente de valor $\rho_i$.
