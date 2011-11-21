@@ -10,69 +10,74 @@
 \setlength{\parskip}{1.2ex}
 \setlength{\parindent}{0em}
 
-\newcommand{\ks}{problema da mochila}
-\newcommand{\Ks}{Problema da mochila}
-\newcommand{\NPC}{NP-Completo}
-
 \clubpenalty = 10000
 \widowpenalty = 10000
 
-\title{Knapsack}
+\title{Problema da mochila}
 \date{Novembro de 2011}
 \author{Thiago Rafael Becker}
 
 \begin{document}
 \maketitle
 \section*{Introdução}
-{\it Definição do problema.}O problema, em sua forma original, é definido como: {\it Dado um conjunto de itens, cada um com um peso e um valor, como encher uma mochila como tal que o 	peso total não ultrapasse o limite de peso da mochila, e o valor total seja o maior possível.}
+{\it Definição do problema.} O problema, em sua forma original, é definido como: {\it Dado um conjunto de itens, cada um com um peso e um valor, como encher uma mochila como tal que o 	peso total não ultrapasse o limite de peso da mochila, e o valor total seja o maior possível.}
 
-{\it Importância do problema.} Problemas similares aparecem em economia (alocação de recursos com limitação financeira, busca de estratégias com limitação de risco), combinatória, matemática aplicada, logística ({\it bin packing}), criptografia ({\it subset sum problem}), corte de materiais com despedício mínimo, .
+{\it Importância do problema.} Problemas similares aparecem em economia (alocação de recursos com limitação de investimento, busca de estratégias com limitação de risco), combinatória, matemática aplicada, logística ({\it bin packing}), criptografia ({\it subset sum problem}), corte de materiais com despedício mínimo.
 
-{\it Problema de decisão}. O problema, como proposto, não serve para a análise de sua complexidade, pois não é um problema de decisão. Para torná-lo um problema de decisão, estabelecemos um limite mínimo $V$ ao valor máximo dos itens na mochila, levando ao seguinte problema de decisão: {\it Dado um conjunto de $n$ itens $I$, cada um com um peso $p_i$ e um valor $v_i$ ($i \in I$), é possível encher uma mochila de forma que o peso total do itens não ultrapasse o limite de peso $P$ e o valor total seja pelo menos $V$.}
+{\it Problema de decisão}. O problema, como proposto, não serve para a análise de sua classe de complexidade, pois não é um problema de decisão. Para torná-lo um problema de decisão, estabelecemos um limite mínimo $V$ ao valor máximo dos itens na mochila, levando ao seguinte problema de decisão: {\it Dado um conjunto de $n$ itens $I$, cada um com um peso $p_i$ e um valor $v_i$ ($i \in I$), é possível encher uma mochila de forma que o peso total do itens não ultrapasse o limite de peso $P$ e o valor total seja pelo menos $V$.}
 
-Existem diversas variações do problema, mas vamos nos focar nas duas abaixo.
+{\it Problema da mochila-0,1.} Este problema surge quando os itens são indivisíveis. De tal forma, para cada item no conjunto, a decisão é de colocá-lo na mochila (1) ou não (0).
 
-{\it Knapsack-0,1.} Este problema surge quando os itens são indivisíveis. Este problema é NP-Completo fraco.
-
-{\it Knapsack fracionário.} Este problema surge quando os itens podem ser divididos em parte fracionárias e pode ser resolvido eficientemente por uma estratégia gulosa.
-
-\section*{Knapsack-0,1}
+\section*{Problema da mochila-0,1}
 Com o problema de decisão definido acima, podemos definir o problema com as seguintes restrições
 \begin{equation}
 \label{restricao:1}
-\left(\sum_{i \in I} v_i\right) \ge V
+\left(\sum_{i \in I} x_i v_i\right) \ge V
 \end{equation}
 
 \begin{equation}
 \label{restricao:2}
-\left(\sum_{i \in I} p_i\right) \le P
+\left(\sum_{i \in I} x_i p_i\right) \le P
 \end{equation}
 
-\subsection*{Solução por força bruta}
-Como existem $n$ itens, existem $2^n$ subconjuntos de $I$. O algoritmo iria procurar por cada um dos conjuntos de itens pela solução ótima, o que levaria a um problema de complexidade $O(2^n)$.
+Nas restrições acima, $x_i \in \{0,1\}$.
 
-[[Algoritmo aqui]]
+\subsection*{Solução por força bruta}
+Como existem $n$ itens, existem $2^n$ subconjuntos de $I$. O algoritmo-solução procura por cada um dos subconjuntos pela solução ótima, o que levaria a um problema de complexidade $c_p^\le = O(2^n)$.
 
 \subsection*{Solução em tempo pseudo-polinomial (programação dinâmica)}
-Por programação dinâmica, é possível obter uma solução de complesidade $O(nP)$.
+Por programação dinâmica, é possível obter uma solução de complexidade $O(nP)$.
 
 {\it Subestrutura ótima.}
+Considere a carga mais valiosa $S=\{s_1, s_2, s_3, ..., s_n\}, S \subseteq I$ que pesa no máximo $P$. Se removermos o item $j$ de $S$, a carga restante deve ser a mais valiosa que pesa no máximo $P - p_j$ obtida de $n - 1$ itens de $S - j$.
 
-\[
+Esta subestrutura ótima pode ser traduzida para a função recursiva abaixo.
+
+\begin{equation}
+\label{eq:knapsack}
 B[i,w] = \left\{
 \begin{IEEEeqnarraybox}[][c]{l?s}
 \IEEEstrut
+0 & se $i = 0$ ou $w = 0$ \\
 B[i-1,w] & se $p_i > w$\\
 max(B[i-1,w], B[i-1,w-p_i] + v_i)
 \IEEEstrut
 \end{IEEEeqnarraybox}
 \right.
-\]
+\end{equation}
+
+Nesta equação, B é uma matriz de tamanho $(n + 1) \times (P + 1)$ que irá conter os resultados intermediários do cálculo.
 
 A resposta para o problema de decisão se encontrará na célula $B[n,P]$ da matriz resultante. Se $B[n,P] \ge V$, o problema está satisfeito.
 
 {\it Algoritmo.} O pseudo-código da solução encontra-se abaixo.
 \begin{algorithmic}
+\FOR{$w = 0 \to P$}
+ \STATE $B[0,w] = 0$
+\ENDFOR
+\FOR{$i = 1 \to n$}
+ \STATE $B[i,0] = 0$
+\ENDFOR
 \FOR{$i = 1 \to n$}
  \FOR{$w = 0 \to P$}
   \IF{$p_i \le w$}
@@ -91,33 +96,30 @@ A resposta para o problema de decisão se encontrará na célula $B[n,P]$ da mat
 \end{algorithmic}
 
 \subsection*{Complexidade do problema}
-A complexidade do algoritmo acima é $O(nP)$, na qual $n$ é a quantidade de elementos do conjunto de entrada, e $P$ é o peso máximo suportado pela mochila. É, portanto, pseudo-polinomial, pois não depende exclusivamente do tamanho do conjunto que compõe o preoblema.
+A complexidade do algoritmo acima é $O(nP)$, na qual $n$ é a quantidade de elementos do conjunto de entrada, e $P$ é o peso máximo suportado pela mochila. É, portanto, pseudo-polinomial, pois não depende exclusivamente do tamanho do conjunto que compõe o preoblema, mas também dos parametros numéricos do problema.
 
 \subsection*{Prova da plenitude-NP}
-{\it Subset sum.} O problema {\it subset sum} será usado para provar que \ks é \NPC. O problema é proposto da seguinte maneira: dado um conjunto de inteiros $X$, existe um subconjunto $S$ de $X$ ($X$ incluso) tal que $\left(\sum S_i\right) = c$?
+{\it Subset sum.} O problema {\it subset sum} será usado para provar que problema da mochila é NP-Completo. O problema é proposto da seguinte maneira: {\it Dado um conjunto de inteiros $X$, existe um subconjunto $S$ de $X$ ($X$ incluso) tal que $\left(\sum S_i\right) = c$?}
 
-{\it Caso especial de \ks.} O caso especial do \ks usado para a prova será tal que $P = V$ e $(\forall i \in I)(v_i=p_i)$. Com essa equivalencia, é possível transformar a restrição \ref{restricao:2} na seguinte restrição:
+{\it Caso especial de problema da mochila.} O caso especial do problema da mochila usado para a prova será tal que $P = V$ e $(\forall i \in I)(v_i=p_i)$. Com essa equivalencia, é possível transformar a restrição \ref{restricao:2} na seguinte restrição:
 \begin{equation}
 \label{restricao:3}
-\left(\sum_{i \in I} v_i\right) \le V
+\left(\sum_{i \in I} x_i v_i\right) \le V
 \end{equation}
 
-e igualando as restrições \ref{restricao:2} e \ref{restricao:3} pelo somatório comum, chegamos a conclusão de que a restrição do caso especial é
+e igualando as restrições \ref{restricao:1} e \ref{restricao:3} pelo somatório comum, chegamos a conclusão de que a restrição do caso especial é
 
 \begin{equation}
 \label{restricao:especial}
-\left(\sum_{i \in I} v_i\right) = V
+V \le \left(\sum_{i \in I} x_i v_i\right) \le V \Rightarrow \left(\sum_{i \in I} x_i v_i\right) = V
 \end{equation}
 
 Analogamente,
 
 \begin{equation}
 \label{restricao:especial_analoga}
-\left(\sum_{i \in I} p_i\right) = P
+\left(\sum_{i \in I} x_i p_i\right) = P
 \end{equation}
 
-Este problema é equivalente ao problema de {\it subset sum}.
-
-\section*{Knapsack fracionário.}
-Este problema pode ser resolvido dividindo-se o valor total de cada item pelo seu peso, obtendo-se o valor por unidade de peso do item $\rho_i$. Após isso, a prenchimento da mochila ocorre usando-se o itens em ordem decrescente de valor $\rho_i$.
+Este problema é equivalente ao problema de {\it subset sum}, Portanto o problema da mochila é NP-Completo.
 \end{document}
