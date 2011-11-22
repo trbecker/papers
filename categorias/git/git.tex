@@ -1,7 +1,21 @@
 \documentclass[a4paper]{article}
 
+\usepackage{graphicx,amsmath,amsfonts,bm,url}
+\usepackage[portuges]{babel}
+\usepackage[a4paper,text={16.5cm,25.2cm},centering]{geometry}
+\usepackage[utf8]{inputenc}
+
+\setcounter{tocdepth}{2}
+\setlength{\parskip}{1.2ex}
+\setlength{\parindent}{0em}
+
+\clubpenalty = 10000
+\widowpenalty = 10000
+
 \begin{document}
 \section*{Introdução}
+Git~\cite{git}\footnote{Git também é uma gíria inglesa usada para definir uma pessoa ignorante, infantil e irritante. Linus Torvalds satiriza a escolha do nome dizendo: ``Eu sou um egoísta degenerado, e vou batizar todos os meus projetos com o meu nome. Primeiro Linux, agora git.'' \cite{linus-is-a-bastard}} é o sistema de controle de versão que apresenta o maior crescimento recente graças ao suporte de ferramentas de desenvolvimento comunitário tais como github~\cite{github}. Também é uma ferramenta cuja estrutura interna é definida como um grafo dirigido acíclico. Visto isso, existiria uma categoria em um repositório? E uma categoria com todos os repositórios possíveis? ({\it Branches} seriam realmente ``endofuntores homomórficos que mapeiam subvariedades em um espaço de Hilbert?'' \cite{joke}.)
+
 \section*{Repositórios git}
 \begin{itemize}
 \item Git -> scm
@@ -10,7 +24,7 @@
 \section*{Repositórios git como categorias}
 \begin{itemize}
 \item Objetos como estados do repositório, com atributos tags, files, hash
-\item Morfismos como modificações do estado. Endomorfismos como nenhuma modificação, dando a noção de identidade. Todo o morfismo $A \rightarrow B$ com $A \ne B$ dá a noção de $A childof B$. A estrutura é similar à um conjunto parcialmente ordenado como categoria.
+\item Morfismos como modificações do estado. Endomorfismos como nenhuma modificação, dando a noção de identidade. Todo o morfismo $A \rightarrow B$ com $A \ne B$ dá a noção de $A child\;of B$. A estrutura é similar à um conjunto parcialmente ordenado como categoria.
 \end{itemize}
 \section*{Transformações em repositórios como gramáticas de grafos}
 \begin{itemize}
@@ -23,4 +37,9 @@
 \item Objetos como repositórios
 \item Morfismos como funtores de transformação
 \end{itemize}
+
+\section*{Conclusão}
+
+Sobre a questão levantada a respeito dos {\it branches} serem funtores homomórficos em espaços de Hilbert, esta era claramente uma brincadeira. (Será?)
+\bibliography{citacoes}{}
 \end{document}
