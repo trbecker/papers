@@ -12,34 +12,118 @@
 \clubpenalty = 10000
 \widowpenalty = 10000
 
+\newcommand{\scm}{{sistemas de gerenciamento de versão}}
+\newcommand{\co}{{$commit$}}
+\newcommand{\diff}{{$diff$}}
+\newcommand{\branch}{{$branch$}}
+\newcommand{\merge}{{$merge$}}
+\newcommand{\mytag}{{$tag$}}
+\newcommand{\baseset}{{\Sigma^\star_\bot}}
+\newcommand{\opa}{{\oplus^c_k}}
+\newcommand{\gopa}{{\{ger\opa\}}}
+\newcommand{\opb}{{\ominus^c_k}}
+\newcommand{\gopb}{{\{ger\opb\}}}
+\newcommand{\transMon}{{T_\baseset}}
+\newcommand{\composition}{{\circ}}
+\newcommand{\morun}{{\gopa \cup \gopb \cup \{id\}}}
+\newcommand{\repo}{{\langle F(\baseset), F(\morun), \delta_0, \delta_1, id, \composition\rangle}}
+
+\title{Sistemas de Gerenciamento de Versão}
+\author{Thiago Rafael Becker}
+\date{Dezembro de 2001}
 \begin{document}
+\maketitle
+\begin{abstract}
+blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+blah blah blah.
+\end{abstract}
+
 \section*{Introdução}
-Git~\cite{git}\footnote{Git também é uma gíria inglesa usada para definir uma pessoa ignorante, infantil e irritante. Linus Torvalds satiriza a escolha do nome dizendo: ``Eu sou um egoísta degenerado, e vou batizar todos os meus projetos com o meu nome. Primeiro Linux, agora git.'' \cite{linus-is-a-bastard}} é o sistema de controle de versão que apresenta o maior crescimento recente graças ao suporte de ferramentas de desenvolvimento comunitário tais como github~\cite{github}. Também é uma ferramenta cuja estrutura interna é definida como um grafo dirigido acíclico. Visto isso, existiria uma categoria em um repositório? E uma categoria com todos os repositórios possíveis? ({\it Branches} seriam realmente ``endofuntores homomórficos que mapeiam subvariedades em um espaço de Hilbert?'' \cite{joke}.)
+Os \scm ({\it source control management, SCM}) são ferramentas largamente
+utilizadas em desenvolvimento de software e operações para controlar as mudanças
+em código fonte e configurações do sistema. 
 
-\section*{Repositórios git}
+\section*{Estrutura e operação dos SCM} \label{sec:intuitiva}
+Um SCM gerencia estados de objetos. O conteúdo destes objetos é uma sequancia de dados pertencentes ao alfabeto $\Sigma_\bot = \Sigma \cup \bot$. Todos os estados de um objeto são definidos pelo conjnto gerado pelo fecho de Kleene sobre o alfabeto $\Sigma_\bot$, $\baseset = \langle\Sigma_\bot, \composition, \varepsilon\rangle$. $\bot$ é um elemento especial que indica indefinição das funções parciais sobre o conjunto $\baseset$.
+
+Além de dados, um SCM gerencia metadados, como nomes apontados para objetos. A modificação de metadados não modifica o conteúdo de um estado, apenas o objeto para o qual o metadado aponta.
+
+O conjunto de estados, transições e metadados são conhecidas como {\it repositório}.
+
+O processo normal de uso de um SCM genérico envolve algumas operações básicas:
 \begin{itemize}
-\item Git -> scm
-\item Estrutura interna, um grafo dirigido acíclico
-\end{itemize}
-\section*{Repositórios git como categorias}
-\begin{itemize}
-\item Objetos como estados do repositório, com atributos tags, files, hash
-\item Morfismos como modificações do estado. Endomorfismos como nenhuma modificação, dando a noção de identidade. Todo o morfismo $A \rightarrow B$ com $A \ne B$ dá a noção de $A child\;of B$. A estrutura é similar à um conjunto parcialmente ordenado como categoria.
-\end{itemize}
-\section*{Transformações em repositórios como gramáticas de grafos}
-\begin{itemize}
-\item Transformações primárias, não são usadas diretamente, mas servem para compor as oprações sobre o repositório.
-\item Composição de transformações
-\item Funtores e composição de funtores
-\end{itemize}
-\section*{Categoria Git}
-\begin{itemize}
-\item Objetos como repositórios
-\item Morfismos como funtores de transformação
+\item \co: a partir das modificações feitas pelo usuário e do estado apontado pelo metadado {\tt HEAD}, cria um novo estado e move o metadado {\tt HEAD} para o novo estado. Pode também mover outros metadados para o novo objeto. Sem modificações, esta operação se comporta como NOP. 
+\item \branch~{\tt nome}~{\tt estado}: cria um novo metadado {\tt nome} apontando para {\tt estado}, movendo o metadado {\tt HEAD} para {\tt estado}. Essencialmente, esta operação cria uma linha de desnvolvimento paralela a linha de desenvolvimento de origem. Novos \co nesta linha de desenvolvimento são aplicados independentes da linha original.
+\item \merge~{\tt estado-base}~{\tt estado-branch}: para que esta operação tenha efeito, uma operação de \branch deve ter ocorrido anteriormente a partir de {\tt ancestral-comum}, e commits devem ter sido feitos neste branch. A operação de merge cira um novo estado a partir de {\tt estado-base} aplicando as modificações de \diff:{\tt ancestral-comum}$ \to ${\tt estado-branch}. Esta operação pode gerar um conflito (indefinição) que deve ser resolvido manualmente pelo usuário.
+\item \mytag~{\tt nome}~{\tt estado}: Esta operação cria um metadado {\tt nome} apontando para {\tt estado}. É muitas vezes semelhante à operação \branch, e em alguns SCM ambas são a mesma operação. Uma \mytag especial é a \mytag {\tt HEAD}, que aponta o estado cujo objeto está recebendo modificações.
 \end{itemize}
 
-\section*{Conclusão}
+\section*{Adição e remoção de caracteres}
+Dois funcionais são definidos sobre $\baseset$: {\it adição de caracter} e {\it remoção de caracter}. A adição de caracter
+\begin{equation} \label{eq:oplus}
+\opa: \baseset \to \baseset, \opa(\bot) = \bot
+\end{equation}
+insere o caracter $c$ na posição $k$, e desloca todos os caracteres a direita de $k$ uma posição à direita. A remoção de caractere
+\begin{equation} \label{eq:ominus}
+\opb: \baseset \to \baseset, \opb(\bot) = \bot
+\end{equation}
+remove o caracter $c$ da posição $k$, e move todos os caracteres à sua direita uma poisção para a esquerda. Além disso, a identidade $id: \baseset \to \baseset$ é definida.
 
-Sobre a questão levantada a respeito dos {\it branches} serem funtores homomórficos em espaços de Hilbert, esta era claramente uma brincadeira. (Será?)
-\bibliography{citacoes}{}
+As funções geradas pelos funcionais $\opa$ e $\opb$ ($\gopa$, $\gopb$) formam um grupo de transformação $\transMon = \langle\gopa \cup \gopb, \composition, id\rangle$. Para provarmos as propriedades do grupo, definimos o mapeamento $\baseset \to \mathbb{N} \cup \{\bot\}$
+
+\begin{equation} \label{map:set}
+\Gamma = \{ \bot_{\Sigma_\bot} \mapsto \bot_{\mathbb{N}\cup \bot}, \varepsilon_{\Sigma_\bot} \mapsto 0_{\mathbb{N}\cup \bot}, c_{\Sigma} \mapsto n_{\mathbb{N}}\}
+\end{equation}
+
+tal que o mapeamento é uma bijeção. O mapeamento das operações $\opa$ é
+
+\begin{equation} \label{map:opa}
+\Gamma(\opa(\sigma)) = \Gamma(\sigma) p_k^{\Gamma(c)}, p_k \in \mathbb{P}
+\end{equation}
+
+e $\opb$ é
+
+\begin{equation} \label{map:opb}
+\Gamma(\opb(\sigma)) = \Gamma(\sigma) p_k^{-\Gamma(c)}, p_k \in \mathbb{P},
+\end{equation}
+e caso exista $n > 0$ tal que $\Gamma(\opb(\sigma)) p_k^{-n} \in \mathbb{N}$, então $\opb(\sigma) = \bot$. Além disso, se $\Gamma(\opb(\sigma)) \notin \mathbb{N}$, então $\opb(\sigma) = \bot$. 
+
+O mapeamento de $\Gamma(\sigma)$, $\sigma \in \baseset$ é tal que
+\begin{equation} \label{map:sigma}
+\Gamma(\sigma) = \prod_{i \ge 1} p_i^{\Gamma(\sigma_i)}, p_i \in \mathbb{P}, \sigma_i \in \baseset
+\end{equation}
+
+Com isso é possível verificar que $\Gamma(\opa)$ e $\Gamma(\opb)$ formam um grupo de transformação sobre $\mathbb{N} \cup \{\bot\}$, provando a existencia de $\transMon$.
+
+
+\section*{Representação como grafo}
+Existe um funtor $F$ que permite representar a categoria livremente gerada de $\transMon$ como um grafo, tal que
+\begin{equation} \label{fun:set}
+F(\baseset) = \sigma_1, \sigma_1 \subset \baseset
+\end{equation}
+\begin{equation} \label{fun:mor}
+F(\morun) = f:\sigma \to \sigma\prime, \sigma,\sigma\prime \in \baseset
+\end{equation}
+
+em que $\sigma_1$ é um conjunto unário. $F$ constrói a estrutura do repositório, e é inversível. Para completar o conceito de um repositório, precisamos definir as operações executadas nele, que é o tema da próxima seção.
+
+
+O grafo que representa um dado repositório é um subgrafo $Repo$ do grafo direto reflexivo 
+\[
+\langle F\baseset, F(\morun)\rangle,
+\]
+e é fácil verificar as propriedades compositiva e associativa das setas $F(\morun)$. Desta forma, a categoria {\tt Repo} 
+ \[
+\repo
+\]
+é a categoria livremente gerada pelo grafo $Repo$.
+
+\section*{Operações sobre {\tt Repo}}
+Na seção \ref{sec:intuitiva}, definimos intuitivamente as operações \co, \branch, \merge e \mytag. Nesta seção, vamos definir estas operações como homofuntores sobre {\tt Repo}.
+
 \end{document}
