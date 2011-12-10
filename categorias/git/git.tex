@@ -26,51 +26,32 @@
 \newcommand{\transMon}{{T_\baseset}}
 \newcommand{\composition}{{\circ}}
 \newcommand{\morun}{{\gopa \cup \gopb \cup \{id\}}}
-\newcommand{\repo}{{\langle F(\baseset), F(\morun), \delta_0, \delta_1, id, \composition\rangle}}
 
-\title{Sistemas de Gerenciamento de Versão}
+\title{Sistemas com dados versionados}
 \author{Thiago Rafael Becker}
-\date{Dezembro de 2001}
+\date{Dezembro de 2011}
 \begin{document}
 \maketitle
 \begin{abstract}
-blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-blah blah blah.
+A semântica de um sistema com dados versionados é estudada a partir de um mapeamento de um grupo de transformações para um grafo direto reflexivo. O grupo de transformações é composto pelas operações adição de caracter e remoção de caracter sobre o conjuntos gerado pelo fecho de Kleene $\baseset$. O funtor de mapeamento deste grupo para um grafo reflexivo direto apresenta a estrutura e a semântica de um VCS.
 \end{abstract}
 
 \section*{Introdução}
-Os \scm ({\it source control management, SCM}) são ferramentas largamente
-utilizadas em desenvolvimento de software e operações para controlar as mudanças
-em código fonte e configurações do sistema. 
+Os sistemas com dados versionados (VCS) são sistemas que armazenam um histórico de modificações dos dados que eles contém. Estes sistemas tem diversas funções tais como gerenciamento de documentos, versões de sistemas e configurações destes sistemas para fins de manter histórico de modificações e {\it rollback} para correção de erros.
 
-\section*{Estrutura e operação dos SCM} \label{sec:intuitiva}
-Um SCM gerencia estados de objetos. O conteúdo destes objetos é uma sequancia de dados pertencentes ao alfabeto $\Sigma_\bot = \Sigma \cup \bot$. Todos os estados de um objeto são definidos pelo conjnto gerado pelo fecho de Kleene sobre o alfabeto $\Sigma_\bot$, $\baseset = \langle\Sigma_\bot, \composition, \varepsilon\rangle$. $\bot$ é um elemento especial que indica indefinição das funções parciais sobre o conjunto $\baseset$.
+O objeto de estudo deste artigo é o cerne da semântica destes sistema, a transição de estados. Para tal, inicialmente vamos definir como são os objetos manipulados por um destes sistemas como um monóide sobre um alfabeto de símbolos, $\baseset$. Com essa definição, vamos definir duas operações de adição e remoção de caracteres destes objetos, e provar que estes formam um grupo de transformação, $\transMon$. Por fim vamos definir um funtor $COMMIT$ que mapeia da categoria livremente gerada por $\transMon$ para {\tt RGr}, assim forncendo a estrutura de um grafo para estes sistemas.
 
-Além de dados, um SCM gerencia metadados, como nomes apontados para objetos. A modificação de metadados não modifica o conteúdo de um estado, apenas o objeto para o qual o metadado aponta.
-
-O conjunto de estados, transições e metadados são conhecidas como {\it repositório}.
-
-O processo normal de uso de um SCM genérico envolve algumas operações básicas:
-\begin{itemize}
-\item \co: a partir das modificações feitas pelo usuário e do estado apontado pelo metadado {\tt HEAD}, cria um novo estado e move o metadado {\tt HEAD} para o novo estado. Pode também mover outros metadados para o novo objeto. Sem modificações, esta operação se comporta como NOP. 
-\item \branch~{\tt nome}~{\tt estado}: cria um novo metadado {\tt nome} apontando para {\tt estado}, movendo o metadado {\tt HEAD} para {\tt estado}. Essencialmente, esta operação cria uma linha de desnvolvimento paralela a linha de desenvolvimento de origem. Novos \co nesta linha de desenvolvimento são aplicados independentes da linha original.
-\item \merge~{\tt estado-base}~{\tt estado-branch}: para que esta operação tenha efeito, uma operação de \branch deve ter ocorrido anteriormente a partir de {\tt ancestral-comum}, e commits devem ter sido feitos neste branch. A operação de merge cira um novo estado a partir de {\tt estado-base} aplicando as modificações de \diff:{\tt ancestral-comum}$ \to ${\tt estado-branch}. Esta operação pode gerar um conflito (indefinição) que deve ser resolvido manualmente pelo usuário.
-\item \mytag~{\tt nome}~{\tt estado}: Esta operação cria um metadado {\tt nome} apontando para {\tt estado}. É muitas vezes semelhante à operação \branch, e em alguns SCM ambas são a mesma operação. Uma \mytag especial é a \mytag {\tt HEAD}, que aponta o estado cujo objeto está recebendo modificações.
-\end{itemize}
+\section*{Objetos maniulados} \label{sec:intuitiva}
+Um SCM gerencia estados de objetos. O conteúdo destes objetos é uma sequência de dados pertencentes ao alfabeto $\Sigma_\bot = \Sigma \cup \bot$. Todos os estados de um objeto são definidos pelo conjnto gerado pelo fecho de Kleene sobre o alfabeto $\Sigma_\bot$, $\baseset = \langle\Sigma_\bot, \composition, \varepsilon\rangle$. $\bot$ é um elemento especial que indica indefinição das funções parciais sobre o conjunto $\baseset$.
 
 \section*{Adição e remoção de caracteres}
 Dois funcionais são definidos sobre $\baseset$: {\it adição de caracter} e {\it remoção de caracter}. A adição de caracter
 \begin{equation} \label{eq:oplus}
-\opa: \baseset \to \baseset, \opa(\bot) = \bot
+\opa: \mathbb{N} \to \Sigma \to (\baseset \to \baseset), \opa(\bot) = \bot
 \end{equation}
 insere o caracter $c$ na posição $k$, e desloca todos os caracteres a direita de $k$ uma posição à direita. A remoção de caractere
 \begin{equation} \label{eq:ominus}
-\opb: \baseset \to \baseset, \opb(\bot) = \bot
+\opb: \mathbb{N} \to \Sigma \to (\baseset \to \baseset), \opb(\bot) = \bot
 \end{equation}
 remove o caracter $c$ da posição $k$, e move todos os caracteres à sua direita uma poisção para a esquerda. Além disso, a identidade $id: \baseset \to \baseset$ é definida.
 
@@ -98,32 +79,37 @@ O mapeamento de $\Gamma(\sigma)$, $\sigma \in \baseset$ é tal que
 \Gamma(\sigma) = \prod_{i \ge 1} p_i^{\Gamma(\sigma_i)}, p_i \in \mathbb{P}, \sigma_i \in \baseset
 \end{equation}
 
+Este mapeamento é uma bijeção nas classes de equvalência de $\mathbb{N}$, tal que $\Gamma^{-1}(n) = \Gamma^{-1}(n\prime), n \neq n\prime, n, n\prime \in \mathbb{N}_\bot$, sendo $\Gamma^{-1}$ o mapeamento inverso a $\Gamma$, isto é, o mapeamento de um número para $\baseset$. Este mapeamento permite que existam inúmeros números primos entre $p_k$ e $p_{k+1}$ usados para repesentar $\sigma$.
+
 Com isso é possível verificar que $\Gamma(\opa)$ e $\Gamma(\opb)$ formam um grupo de transformação sobre $\mathbb{N} \cup \{\bot\}$, provando a existencia de $\transMon$.
 
 
 \section*{Representação como grafo}
-Existe um funtor $F$ que permite representar a categoria livremente gerada de $\transMon$ como um grafo, tal que
+Com as informações acima, é possível criar um funtor que implementa a operação \co, $COMMIT$. O funtor é tal que
 \begin{equation} \label{fun:set}
-F(\baseset) = \sigma_1, \sigma_1 \subset \baseset
+COMMIT(\baseset) = \sigma_1, \sigma_1 \subset \baseset
 \end{equation}
 \begin{equation} \label{fun:mor}
-F(\morun) = f:\sigma \to \sigma\prime, \sigma,\sigma\prime \in \baseset
+COMMIT(\morun) = f:\sigma_1 \to \sigma_1\prime, \sigma_1,\sigma_1\prime \in \baseset
 \end{equation}
+em que $\sigma_1$ é um conjunto unário. $COMMIT$ constrói a estrutura do repositório, e é inversível. Intuitivamente, este funtor toma um conjunto $\sigma_1$ e uma composição de morfismos em $\morun$ que transforma o estado do repositório. 
 
-em que $\sigma_1$ é um conjunto unário. $F$ constrói a estrutura do repositório, e é inversível. Para completar o conceito de um repositório, precisamos definir as operações executadas nele, que é o tema da próxima seção.
-
-
-O grafo que representa um dado repositório é um subgrafo $Repo$ do grafo direto reflexivo 
+O grafo que representa um dado repositório é um subgrafo $Repo$ do grafo direto reflexivo
 \[
-\langle F\baseset, F(\morun)\rangle,
+\langle COMMIT(\baseset), COMMIT(\morun)\rangle,
 \]
-e é fácil verificar as propriedades compositiva e associativa das setas $F(\morun)$. Desta forma, a categoria {\tt Repo} 
+e é simples verificar as propriedades compositiva e associativa das setas $COMMIT(\morun)$ pelo mapeamento $\Gamma$ acima. Desta forma, a categoria {\tt Repo} 
  \[
-\repo
+\langle COMMIT(\baseset), COMMIT(\morun), \delta_0, \delta_1, id, \composition\rangle
 \]
-é a categoria livremente gerada pelo grafo $Repo$.
+é a categoria livremente gerada pelo grafo $Repo$. O objeto inicial de toda a categoria {\tt Repo} é a palavra vazia $\varepsilon$, que representa um repositório vazio.
 
-\section*{Operações sobre {\tt Repo}}
-Na seção \ref{sec:intuitiva}, definimos intuitivamente as operações \co, \branch, \merge e \mytag. Nesta seção, vamos definir estas operações como homofuntores sobre {\tt Repo}.
+\section*{Conclusões e desenvolvimentos futuros}
+O funtor $COMMIT$ da categoria livremente gerada de $\transMon$ para {\tt Repo} representa o cerne da semântica dos sistema com dados versionados. O trabalho é incompleto, entretanto: não trata de sistemas que possuam {\it merging} e {\it branching}, nem de metadados comumente presentes nestes sistemas.
 
+É possível perceber que a categoria {\tt Repo} apresenta uma estrutura semelhante ao de um reticulado. Analogamente aos conjuntos parcialmente ordenados vistos como categorias, {\it branching} poderia ser visto como um produto de dois objetos, e {\it merging} como o coproduto de dois objetos, mas isto são coisas a se estudar.
+
+Metadados podem ser estudados como endomorfismos etiquetados, porém a construção dos funtores para a criação e movimento destes metadados pode ser complexa. Isso talvez possa ser possível através de uma gramática de grafos sobre $Repo$.
+
+Além disso, o estudo pode se estender para o estudos de todos os sistemas versionados e seus funtores, para verificar que tipo de estrutura tem estes.
 \end{document}
