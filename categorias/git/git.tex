@@ -19,13 +19,17 @@
 \newcommand{\merge}{{$merge$}}
 \newcommand{\mytag}{{$tag$}}
 \newcommand{\baseset}{{\Sigma^\star_\bot}}
-\newcommand{\opa}{{\oplus^c_k}}
-\newcommand{\gopa}{{\{ger\opa\}}}
-\newcommand{\opb}{{\ominus^c_k}}
-\newcommand{\gopb}{{\{ger\opb\}}}
+\newcommand{\addc}[2]{{\mathbf{add\_char}_{#1}^{#2}}}
+\newcommand{\opa}{{\addc{c}{k}}}
+\newcommand{\remc}[2]{{\mathbf{rem\_char}_{#1}^{#2}}}
+\newcommand{\gopa}{{ger\{\opa\}}}
+\newcommand{\opb}{{\remc{c}{k}}}
+\newcommand{\gopb}{{ger\{\opb\}}}
 \newcommand{\transMon}{{T_\baseset}}
 \newcommand{\composition}{{\circ}}
 \newcommand{\morun}{{\gopa \cup \gopb \cup \{id\}}}
+\newcommand{\len}[1]{{len(#1)}}
+\newcommand{\commit}{{\mathbf{Commit}}}
 
 \title{Sistemas com dados versionados}
 \author{Thiago Rafael Becker}
@@ -33,42 +37,79 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-A semântica de um sistema com dados versionados é estudada a partir de um mapeamento de um grupo de transformações para um grafo direto reflexivo. O grupo de transformações é composto pelas operações adição de caracter e remoção de caracter sobre o conjuntos gerado pelo fecho de Kleene $\baseset$. O funtor de mapeamento deste grupo para um grafo reflexivo direto apresenta a estrutura e a semântica de um VCS.
+A semântica de um sistema com dados versionados é estudada a partir de um mapeamento de um monóide de transformação para um grafo direto reflexivo. O monóide de transformação é composto pelas operações adição de símbolo e remoção de símbolo sobre o conjuntos gerado pelo fecho de Kleene $\baseset$. O funtor de mapeamento deste grupo para um grafo reflexivo direto apresenta a estrutura e a semântica de um VCS.
 \end{abstract}
 
 \section*{Introdução}
 Os sistemas com dados versionados (VCS) são sistemas que armazenam um histórico de modificações dos dados que eles contém. Estes sistemas tem diversas funções tais como gerenciamento de documentos, versões de sistemas e configurações destes sistemas para fins de manter histórico de modificações e {\it rollback} para correção de erros.
 
-O objeto de estudo deste artigo é o cerne da semântica destes sistema, a transição de estados. Para tal, inicialmente vamos definir como são os objetos manipulados por um destes sistemas como um monóide sobre um alfabeto de símbolos, $\baseset$. Com essa definição, vamos definir duas operações de adição e remoção de caracteres destes objetos, e provar que estes formam um grupo de transformação, $\transMon$. Por fim vamos definir um funtor $COMMIT$ que mapeia da categoria livremente gerada por $\transMon$ para {\tt RGr}, assim forncendo a estrutura de um grafo para estes sistemas.
+O objeto de estudo deste artigo é o cerne da semântica destes sistema, a transição de estados. Para tal, inicialmente vamos definir como são os objetos manipulados por um destes sistemas como um monóide sobre um alfabeto de símbolos, $\baseset$. Com essa definição, vamos definir duas operações de adição e remoção de caracteres destes objetos, e provar que estes formam um monóide de transformação, $\transMon$. Por fim vamos definir um funtor $\commit$ que mapeia da categoria livremente gerada por $\transMon$ para {\tt RGr}, assim forncendo a estrutura de um grafo para estes sistemas.
 
 \section*{Objetos maniulados} \label{sec:intuitiva}
 Um SCM gerencia estados de objetos. O conteúdo destes objetos é uma sequência de dados pertencentes ao alfabeto $\Sigma_\bot = \Sigma \cup \bot$. Todos os estados de um objeto são definidos pelo conjnto gerado pelo fecho de Kleene sobre o alfabeto $\Sigma_\bot$, $\baseset = \langle\Sigma_\bot, \composition, \varepsilon\rangle$. $\bot$ é um elemento especial que indica indefinição das funções parciais sobre o conjunto $\baseset$.
 
+\subsection*{Algumas definições}
+\newtheorem{mydef}[section]{Definição}
+\begin{mydef}
+Uma {\it palavra} em $\baseset$ é uma cadeia de símbolos $\sigma = \{\sigma_1\sigma_2\ldots\sigma_n\}$ de tamanho $n$ em $\Sigma$ ou $\bot$.
+\end{mydef}
+\begin{mydef}
+O comprimento de uma cadeia de símbolos $\sigma$ de $\baseset$ é dado por $\len{\sigma}$, $\len{\varepsilon} = \len{\bot} = 0$.
+\end{mydef} 
+
 \section*{Adição e remoção de caracteres}
 Dois funcionais são definidos sobre $\baseset$: {\it adição de caracter} e {\it remoção de caracter}. A adição de caracter
 \begin{equation} \label{eq:oplus}
-\opa: \mathbb{N} \to \Sigma \to (\baseset \to \baseset), \opa(\bot) = \bot
+\opa: \mathbb{N} \to \Sigma \to (\baseset \to \baseset)
 \end{equation}
-insere o caracter $c$ na posição $k$, e desloca todos os caracteres a direita de $k$ uma posição à direita. A remoção de caractere
+definida como
+\begin{equation} \label{eq:def_add}
+\opa(\sigma) = \left\{
+\begin{tabular}{ll}
+$\bot$ & se $\len{\sigma} < k$,\\
+$\bot$ & se $\sigma = \bot$, \\
+$\{\sigma_1\ldots\sigma_{k-1}c\sigma_k\ldots\sigma_n\}$
+\end{tabular}\right.
+\end{equation}
+insere o símbolo $c$ na posição $k$, e desloca todos os caracteres a direita de $k$ uma posição à direita, ou retorna $\bot$ se $k > \len{\sigma}$. A remoção de caractere
 \begin{equation} \label{eq:ominus}
-\opb: \mathbb{N} \to \Sigma \to (\baseset \to \baseset), \opb(\bot) = \bot
+\opb: \mathbb{N} \to \Sigma \to (\baseset \to \baseset)
 \end{equation}
-remove o caracter $c$ da posição $k$, e move todos os caracteres à sua direita uma poisção para a esquerda. Além disso, a identidade $id: \baseset \to \baseset$ é definida.
+definida como
+\begin{equation} \label{eq:def_rem}
+\opb(\sigma) = \left\{
+\begin{tabular}{ll}
+$\bot$ & se $\len{\sigma} < k$,\\
+$\bot$ & se $\sigma_k \neq c$, \\
+$\bot$ & se $\sigma = \bot$, \\
+$\{\sigma_1\ldots\sigma_{k-1}\varepsilon\sigma_{k+1}\ldots\sigma_n\} = \{\sigma_1\ldots\sigma_{k-1}\sigma_{k+1}\ldots\sigma_n\}$
+\end{tabular}\right.
+\end{equation}
+remove o símbolo $c$ da posição $k$, e move todos os caracteres à sua direita uma poisção para a esquerda, ou retorna $\bot$ se 
+\begin{itemize}
+\item $k > \len{\sigma}$
+\item $\sigma_k \neq c$.
+\end{itemize}
+Além disso, a identidade $id: \baseset \to \baseset$ é definida tal que $id(\sigma) = \sigma$.
 
-As funções geradas pelos funcionais $\opa$ e $\opb$ ($\gopa$, $\gopb$) formam um grupo de transformação $\transMon = \langle\gopa \cup \gopb, \composition, id\rangle$. Para provarmos as propriedades do grupo, definimos o mapeamento $\baseset \to \mathbb{N} \cup \{\bot\}$
+\newtheorem{obs}{Observação}[section]
+\begin{obs}
+Note que as operações $\opa$ e $\opb$ não são inversas em $\baseset$ se $\opa(\sigma) = \bot$ ou $\opb(\sigma) = \bot$para $\bot \neq \sigma \in \baseset$, uma vez que $(\opa \composition \opb)(\sigma) = \bot$. Para todos os outros valores, as operações são inversas, $(\opa \composition \opb)(\sigma) = \sigma$ e $(\opb \composition \opa)(\sigma) = \sigma$.
+\end{obs}
 
+\begin{obs}
+Exemplos de indefinição. Dado o alfabeto $\Sigma = \{a, b\}$ e a palavra $\sigma = a^3b^2$ ($\len{\sigma} = 5$, as seguintes operações são indefinidas: $\addc{7}{a}(\sigma)$ e $\remc{7}{a}(\sigma)$ (pois $7 > \len{\sigma}$), $(\remc{3}{a} \composition \remc{3}{a})(\sigma)$ (pois após a primeira operação a posição 3 de $\sigma\prime$ é ocupada pelo símbolo $b$).
+\end{obs}  
+
+As funções geradas pelos funcionais $\opa$ e $\opb$ ($\gopa$, $\gopb$) formam um monóide de transformação $\transMon = \langle\gopa \cup \gopb, \composition, id\rangle$. Para provarmos as propriedades deste monóide, definimos o mapeamento $\baseset \to \mathbb{N}_\bot$
 \begin{equation} \label{map:set}
 \Gamma = \{ \bot_{\Sigma_\bot} \mapsto \bot_{\mathbb{N}\cup \bot}, \varepsilon_{\Sigma_\bot} \mapsto 0_{\mathbb{N}\cup \bot}, c_{\Sigma} \mapsto n_{\mathbb{N}}\}
 \end{equation}
-
 tal que o mapeamento é uma bijeção. O mapeamento das operações $\opa$ é
-
 \begin{equation} \label{map:opa}
 \Gamma(\opa(\sigma)) = \Gamma(\sigma) p_k^{\Gamma(c)}, p_k \in \mathbb{P}
 \end{equation}
-
 e $\opb$ é
-
 \begin{equation} \label{map:opb}
 \Gamma(\opb(\sigma)) = \Gamma(\sigma) p_k^{-\Gamma(c)}, p_k \in \mathbb{P},
 \end{equation}
@@ -81,31 +122,31 @@ O mapeamento de $\Gamma(\sigma)$, $\sigma \in \baseset$ é tal que
 
 Este mapeamento é uma bijeção nas classes de equvalência de $\mathbb{N}$, tal que $\Gamma^{-1}(n) = \Gamma^{-1}(n\prime), n \neq n\prime, n, n\prime \in \mathbb{N}_\bot$, sendo $\Gamma^{-1}$ o mapeamento inverso a $\Gamma$, isto é, o mapeamento de um número para $\baseset$. Este mapeamento permite que existam inúmeros números primos entre $p_k$ e $p_{k+1}$ usados para repesentar $\sigma$.
 
-Com isso é possível verificar que $\Gamma(\opa)$ e $\Gamma(\opb)$ formam um grupo de transformação sobre $\mathbb{N} \cup \{\bot\}$, provando a existencia de $\transMon$.
+Com isso é possível verificar que $\Gamma(\opa)$ e $\Gamma(\opb)$ formam um monóide de transformação sobre $\mathbb{N} \cup \{\bot\}$, provando a existencia de $\transMon$.
 
 
 \section*{Representação como grafo}
-Com as informações acima, é possível criar um funtor que implementa a operação \co, $COMMIT$. O funtor é tal que
+Com as informações acima, é possível criar um funtor que implementa a operação \co, $\commit$. O funtor é tal que
 \begin{equation} \label{fun:set}
-COMMIT(\baseset) = \sigma_1, \sigma_1 \subset \baseset
+\commit(\baseset) = \sigma_1, \sigma_1 \subset \baseset
 \end{equation}
 \begin{equation} \label{fun:mor}
-COMMIT(\morun) = f:\sigma_1 \to \sigma_1\prime, \sigma_1,\sigma_1\prime \in \baseset
+\commit(\morun) = f:\sigma_1 \to \sigma_1\prime, \sigma_1,\sigma_1\prime \in \baseset
 \end{equation}
-em que $\sigma_1$ é um conjunto unário. $COMMIT$ constrói a estrutura do repositório, e é inversível. Intuitivamente, este funtor toma um conjunto $\sigma_1$ e uma composição de morfismos em $\morun$ que transforma o estado do repositório. 
+em que $\sigma_1$ é um conjunto unário. $\commit$ constrói a estrutura do repositório, e é inversível. Intuitivamente, este funtor toma um conjunto $\sigma_1$ e uma composição de morfismos em $\morun$ que transforma o estado do repositório. 
 
 O grafo que representa um dado repositório é um subgrafo $Repo$ do grafo direto reflexivo
 \[
-\langle COMMIT(\baseset), COMMIT(\morun)\rangle,
+\langle \commit(\baseset), \commit(\morun)\rangle,
 \]
-e é simples verificar as propriedades compositiva e associativa das setas $COMMIT(\morun)$ pelo mapeamento $\Gamma$ acima. Desta forma, a categoria {\tt Repo} 
+e é simples verificar as propriedades compositiva e associativa das setas $\commit(\morun)$ pelo mapeamento $\Gamma$ acima. Desta forma, a categoria {\tt Repo} 
  \[
-\langle COMMIT(\baseset), COMMIT(\morun), \delta_0, \delta_1, id, \composition\rangle
+\langle \commit(\baseset), \commit(\morun), \delta_0, \delta_1, id, \composition\rangle
 \]
 é a categoria livremente gerada pelo grafo $Repo$. O objeto inicial de toda a categoria {\tt Repo} é a palavra vazia $\varepsilon$, que representa um repositório vazio.
 
 \section*{Conclusões e desenvolvimentos futuros}
-O funtor $COMMIT$ da categoria livremente gerada de $\transMon$ para {\tt Repo} representa o cerne da semântica dos sistema com dados versionados. O trabalho é incompleto, entretanto: não trata de sistemas que possuam {\it merging} e {\it branching}, nem de metadados comumente presentes nestes sistemas.
+O funtor $\commit$ da categoria livremente gerada de $\transMon$ para {\tt Repo} representa o cerne da semântica dos sistema com dados versionados. O trabalho é incompleto, entretanto: não trata de sistemas que possuam {\it merging} e {\it branching}, nem de metadados comumente presentes nestes sistemas.
 
 É possível perceber que a categoria {\tt Repo} apresenta uma estrutura semelhante ao de um reticulado. Analogamente aos conjuntos parcialmente ordenados vistos como categorias, {\it branching} poderia ser visto como um produto de dois objetos, e {\it merging} como o coproduto de dois objetos, mas isto são coisas a se estudar.
 
