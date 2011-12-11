@@ -46,7 +46,7 @@ Os sistemas com dados versionados (VCS) são sistemas que armazenam um históric
 O objeto de estudo deste artigo é o cerne da semântica destes sistema, a transição de estados. Para tal, inicialmente vamos definir como são os objetos manipulados por um destes sistemas como um monóide sobre um alfabeto de símbolos, $\baseset$. Com essa definição, vamos definir duas operações de adição e remoção de caracteres destes objetos, e provar que estes formam um monóide de transformação, $\transMon$. Por fim vamos definir um funtor $\commit$ que mapeia da categoria livremente gerada por $\transMon$ para {\tt RGr}, assim forncendo a estrutura de um grafo para estes sistemas.
 
 \section*{Objetos maniulados} \label{sec:intuitiva}
-Um SCM gerencia estados de objetos. O conteúdo destes objetos é uma sequência de dados pertencentes ao alfabeto $\Sigma_\bot = \Sigma \cup \bot$. Todos os estados de um objeto são definidos pelo conjnto gerado pelo fecho de Kleene sobre o alfabeto $\Sigma_\bot$, $\baseset = \langle\Sigma_\bot, \composition, \varepsilon\rangle$. $\bot$ é um elemento especial que indica indefinição das funções parciais sobre o conjunto $\baseset$.
+Um SCM gerencia estados de objetos. O conteúdo destes objetos é uma sequência de dados pertencentes ao alfabeto $\Sigma$. Todos os estados de um objeto são definidos pelo conjnto gerado pelo fecho de Kleene sobre este alfabeto, $\langle\Sigma^\star, \composition, \varepsilon\rangle$. $\bot$ é um elemento especial que indica indefinição das funções parciais sobre o conjunto $\baseset = \Sigma^\star \cup \bot$.
 
 \subsection*{Algumas definições}
 \newtheorem{mydef}[section]{Definição}
@@ -85,44 +85,50 @@ $\bot$ & se $\sigma = \bot$, \\
 $\{\sigma_1\ldots\sigma_{k-1}\varepsilon\sigma_{k+1}\ldots\sigma_n\} = \{\sigma_1\ldots\sigma_{k-1}\sigma_{k+1}\ldots\sigma_n\}$
 \end{tabular}\right.
 \end{equation}
-remove o símbolo $c$ da posição $k$, e move todos os caracteres à sua direita uma poisção para a esquerda, ou retorna $\bot$ se 
-\begin{itemize}
-\item $k > \len{\sigma}$
-\item $\sigma_k \neq c$.
-\end{itemize}
+remove o símbolo $c$ da posição $k$, e move todos os caracteres à sua direita uma poisção para a esquerda, ou retorna $\bot$ se $k > \len{\sigma}$ ou $\sigma_k \neq c$.
 Além disso, a identidade $id: \baseset \to \baseset$ é definida tal que $id(\sigma) = \sigma$.
 
 \newtheorem{obs}{Observação}[section]
 \begin{obs}
-Note que as operações $\opa$ e $\opb$ não são inversas em $\baseset$ se $\opa(\sigma) = \bot$ ou $\opb(\sigma) = \bot$para $\bot \neq \sigma \in \baseset$, uma vez que $(\opa \composition \opb)(\sigma) = \bot$. Para todos os outros valores, as operações são inversas, $(\opa \composition \opb)(\sigma) = \sigma$ e $(\opb \composition \opa)(\sigma) = \sigma$.
+Note que as operações $\opa$ e $\opb$ são quasi-inversas em $\baseset$ pois se $\opa(\sigma) = \bot$ ou $\opb(\sigma) = \bot$ para $\bot \neq \sigma \in \baseset$, uma vez que $(\opa \composition \opb)(\sigma) = \bot$ em ambos os casos. Para todos os outros valores, as operações são inversas, $(\opa \composition \opb)(\sigma) = \sigma$ e $(\opb \composition \opa)(\sigma) = \sigma$. Note também que se $\sigma = \bot$, $\opa$ e $\opb$ são inversas.
 \end{obs}
 
 \begin{obs}
 Exemplos de indefinição. Dado o alfabeto $\Sigma = \{a, b\}$ e a palavra $\sigma = a^3b^2$ ($\len{\sigma} = 5$, as seguintes operações são indefinidas: $\addc{7}{a}(\sigma)$ e $\remc{7}{a}(\sigma)$ (pois $7 > \len{\sigma}$), $(\remc{3}{a} \composition \remc{3}{a})(\sigma)$ (pois após a primeira operação a posição 3 de $\sigma\prime$ é ocupada pelo símbolo $b$).
 \end{obs}  
 
-As funções geradas pelos funcionais $\opa$ e $\opb$ ($\gopa$, $\gopb$) formam um monóide de transformação $\transMon = \langle\gopa \cup \gopb, \composition, id\rangle$. Para provarmos as propriedades deste monóide, definimos o mapeamento $\baseset \to \mathbb{N}_\bot$
-\begin{equation} \label{map:set}
-\Gamma = \{ \bot_{\Sigma_\bot} \mapsto \bot_{\mathbb{N}\cup \bot}, \varepsilon_{\Sigma_\bot} \mapsto 0_{\mathbb{N}\cup \bot}, c_{\Sigma} \mapsto n_{\mathbb{N}}\}
-\end{equation}
-tal que o mapeamento é uma bijeção. O mapeamento das operações $\opa$ é
-\begin{equation} \label{map:opa}
-\Gamma(\opa(\sigma)) = \Gamma(\sigma) p_k^{\Gamma(c)}, p_k \in \mathbb{P}
-\end{equation}
-e $\opb$ é
-\begin{equation} \label{map:opb}
-\Gamma(\opb(\sigma)) = \Gamma(\sigma) p_k^{-\Gamma(c)}, p_k \in \mathbb{P},
-\end{equation}
-e caso exista $n > 0$ tal que $\Gamma(\opb(\sigma)) p_k^{-n} \in \mathbb{N}$, então $\opb(\sigma) = \bot$. Além disso, se $\Gamma(\opb(\sigma)) \notin \mathbb{N}$, então $\opb(\sigma) = \bot$. 
+As funções geradas pelos funcionais $\opa$ e $\opb$ ($\gopa$, $\gopb$) formam um monóide de transformação $\transMon = \langle\baseset, \gopa \cup \gopb \cup id\rangle$. 
 
-O mapeamento de $\Gamma(\sigma)$, $\sigma \in \baseset$ é tal que
-\begin{equation} \label{map:sigma}
-\Gamma(\sigma) = \prod_{i \ge 1} p_i^{\Gamma(\sigma_i)}, p_i \in \mathbb{P}, \sigma_i \in \baseset
+{\tt Composição}. As composições de $\opa$ e $\opb$ são:
+\begin{equation} \label{eq:opa-comp-opb}
+\addc{i}{a} \composition \remc{j}{b} = \left\{
+\begin{tabular}{ll}
+$id$ & $se a = b e i = j$
+$
+\end{tabular}\right.
 \end{equation}
+%Para provarmos as propriedades deste monóide, definimos o mapeamento $\baseset \to \mathbb{N}_\bot$
+%\begin{equation} \label{map:set}
+%\Gamma = \{ \bot_{\Sigma_\bot} \mapsto \bot_{\mathbb{N}\cup \bot}, \varepsilon_{\Sigma_\bot} \mapsto 0_{\mathbb{N}\cup \bot}, c_{\Sigma} \mapsto n_{\mathbb{N}}\}
+%\end{equation}
+%tal que o mapeamento é uma bijeção. O mapeamento das operações $\opa$ é
+%\begin{equation} \label{map:opa}
+%\Gamma(\opa(\sigma)) = \Gamma(\sigma) p_k^{\Gamma(c)}, p_k \in \mathbb{P}
+%\end{equation}
+%e $\opb$ é
+%\begin{equation} \label{map:opb}
+%\Gamma(\opb(\sigma)) = \Gamma(\sigma) p_k^{-\Gamma(c)}, p_k \in \mathbb{P},
+%\end{equation}
+%e caso exista $n > 0$ tal que $\Gamma(\opb(\sigma)) p_k^{-n} \in \mathbb{N}$, então $\opb(\sigma) = \bot$. Além disso, se $\Gamma(\opb(\sigma)) \notin \mathbb{N}$, então $\opb(\sigma) = \bot$. 
 
-Este mapeamento é uma bijeção nas classes de equvalência de $\mathbb{N}$, tal que $\Gamma^{-1}(n) = \Gamma^{-1}(n\prime), n \neq n\prime, n, n\prime \in \mathbb{N}_\bot$, sendo $\Gamma^{-1}$ o mapeamento inverso a $\Gamma$, isto é, o mapeamento de um número para $\baseset$. Este mapeamento permite que existam inúmeros números primos entre $p_k$ e $p_{k+1}$ usados para repesentar $\sigma$.
+%O mapeamento de $\Gamma(\sigma)$, $\sigma \in \baseset$ é tal que
+%\begin{equation} \label{map:sigma}
+%\Gamma(\sigma) = \prod_{i \ge 1} p_i^{\Gamma(\sigma_i)}, p_i \in \mathbb{P}, \sigma_i \in \baseset
+%\end{equation}
 
-Com isso é possível verificar que $\Gamma(\opa)$ e $\Gamma(\opb)$ formam um monóide de transformação sobre $\mathbb{N} \cup \{\bot\}$, provando a existencia de $\transMon$.
+%Este mapeamento é uma bijeção nas classes de equvalência de $\mathbb{N}$, tal que $\Gamma^{-1}(n) = \Gamma^{-1}(n\prime), n \neq n\prime, n, n\prime \in \mathbb{N}_\bot$, sendo $\Gamma^{-1}$ o mapeamento inverso a $\Gamma$, isto é, o mapeamento de um número para $\baseset$. Este mapeamento permite que existam inúmeros números primos entre $p_k$ e $p_{k+1}$ usados para repesentar $\sigma$.
+
+%Com isso é possível verificar que $\Gamma(\opa)$ e $\Gamma(\opb)$ formam um monóide de transformação sobre $\mathbb{N} \cup \{\bot\}$, provando a existencia de $\transMon$.
 
 
 \section*{Representação como grafo}

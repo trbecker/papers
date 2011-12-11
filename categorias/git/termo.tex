@@ -1,0 +1,99 @@
+\documentclass[a4paper]{article}
+
+\usepackage{graphicx,amsmath,amsfonts,bm,url,amsthm}
+\usepackage[portuges]{babel}
+\usepackage[a4paper,text={16.5cm,25.2cm},centering]{geometry}
+\usepackage[utf8]{inputenc}
+
+\setcounter{tocdepth}{2}
+\setlength{\parskip}{1.2ex}
+\setlength{\parindent}{0em}
+
+\clubpenalty = 10000
+\widowpenalty = 10000
+
+\newcommand{\trls}{{\tau_0}}
+\newcommand{\trl}[2]{{#1 \trls #2}}
+\newcommand{\termo}{{\mathbf{Thermo}}}
+\newcommand{\obtermo}{{\mathbf{Ob}_\termo}}
+\newcommand{\mortermo}{{\mathbf{Mor}_\termo}}
+\newcommand{\tempn}[1]{{\mathbf{Temp}_{#1}}}
+\newcommand{\temp}{{\tempn{n}}}
+\newcommand{\obtempn}[1]{{\mathbf{Ob}_{\tempn{#1}}}}
+\newcommand{\mortempn}[1]{{\mathbf{Mor}_{\tempn{#1}}}}
+\newcommand{\obtemp}{{\obtempn{n}}}
+\newcommand{\mortemp}{{\mortempn{n}}}
+\newcommand{\diffen}{{\ominus}}
+
+\newtheorem{definicao}{Definição}[section]
+
+\begin{document}
+\begin{abstract}
+blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+\end{abstract}
+
+\section*{Introdução}
+\begin{definicao}[Lei zero da termodinâmica] \label{def:0th}
+Se dois corpos $A$ e $C$ estãem equilíbrio térmico com um terceiro corpo $B$, eles também estão em equilíbrio térmico entre si.
+\end{definicao}
+Uma consequêcia importante desta lei é o surgimento do conceito de temperatura: todos os objetos em equlíbrio térmico podem ser agrupados e marcados com um número que indica a temperatura deste conjunto. Este artigo estuda esta lei de acordo com a teoria de categorias.
+
+Neste artigo, {\it sistema} e {\it corpo} são usados alternadamente. Um sistema é composto um ou mais corpos, e as definições neste artigo aplicam-se indistintamente, exceto quando explicitamente declarado.
+
+\section*{A relação $\trls$}
+Pela descrição da lei zero da termodinâmica é possível perceber que existe uma relação euclideana entre os corpos em equilíbrio térmico. A relação $\trls$ é definida para indicar a relação entre dois corpos em equilíbrio térmico.
+
+\begin{definicao}[Relação euclideana]  \label{def:euclidean}
+Uma relação $\trls$ em um conjunto $X$ é euclideana se satifaz a seguinte condição:
+\begin{equation}
+\forall a, b, c \in X (\trl{a}{b} \wedge \trl{c}{b} \Rightarrow \trl{a}{c})
+\end{equation}
+\end{definicao}
+
+Este sistema permanece em equilíbrio térmico enquanto permanecere em isolamento adiabático: nenhuma fonte de energia externa é capaz de trocar energia com o sistema. Ou seja, o conceito de equilíbrio térmico vem da incapacidade de dois sistemas de trocar energia entre si. Um corpo de natureza física está em equlíbrio térmico consigo mesmo {\it sempre} (pois não troca energia consigo mesmo), assim estabelecendo que $\trls$ é também uma relação reflexiva. Uma relação euclideana e reflexiva é igualmente simétrica e transitiva, e de tal forma $\trls$ é uma relação de equivalência (reflexiva, simétrica e transitiva).
+
+\begin{proof}[Simetria de $\trls$.] \label{pr:simetria}
+Se dois corpos $a$, $b$ estão em equilíbrio térmico $\trl{a}{b}$, $a$ é incapaz de trocar (ceder ou receber) energia com $b$. Assim, $b$ também é incapaz de trocar (receber ou ceder) energia com $a$. 
+\end{proof}
+
+\begin{proof}[Transitividade de $\trls$.] \label{pr:transitividade}
+Dados $a$, $b$ e $c$ corpos, se $\trl{a}{b} \wedge \trl{b}{c} \Rightarrow \trl{a}{c}$, pois (por simetria) $\trl{b}{c} \Rightarrow \trl{c}{b}$, e pela propriedade euclideana, $\trl{a}{b} \wedge \trl{c}{b} \Rightarrow \trl{a}{c}$.
+\end{proof}
+
+A categoria $\termo$ formada por esta relação é
+\begin{equation} \label{ma:termo}
+\termo = \langle \obtermo, \mortermo, \delta_0, \delta_1, id, \circ \rangle
+\end{equation}
+em que $\obtermo$ é uma colação de sistemas, $\mortermo$ é um conjunto de relações $\trl{a}{b}$ de $a,b \in \obtermo$, $\delta_0: \mortermo \to \obtermo$ para a relação $\trl{a}{b}$ resulta em $a$, $\delta_1: \mortermo \to \obtermo$ para a relação $\trl{a}{b}$ resulta em $b$, $id: \obtermo \to \mortermo$ é a propriedade reflexiva de $\trls$, e $\circ: (\mortermo)^2 \to \mortermo$ é a propriedade transitiva de $\trls$.
+
+Intuitivamente, os morfismos desta categoria formam um multigrafo cujos subgrafos são completamente conexos, e todo morfismo é inverso de si mesmo (pela propriedade de simetria). Estes subgrafos são subcategorias de $\termo$, e cada uma destas categorias é uma {\it classe de equivalência.} A cada uma destas subcategorias daremos o nome de $\temp$, cujo {\it shape} é o de um grafo totalmente conexo.
+
+\section*{Temperaturas}
+A categoria
+\begin{equation} \label{cat:temp}
+\temp = \langle \obtemp, \mortemp, \delta_0, \delta_1, id, \circ\rangle
+\end{equation}
+é uma subcategoria de $\termo$, tal que $\obtemp \subset \obtermo$ e $\mortemp \subset \mortermo$, e todas as demais operações são iguais a $\termo$.
+
+O conceito de temperatura é dado pela relação de ordem parcial entre $\obtempn{a}$ e $\obtempn{b}$.
+
+\begin{definicao}[Ordenamento parcial da temperatura] \label{def:ordemtemp}
+Dados dois objetos $a \in \obtempn{a}$ e $b \in \obtempn{b}$ e a operação binária diferença de energia $\diffen$
+\begin{itemize}
+\item $a \diffen b > 0 \Rightarrow \tempn{a} > \tempn{b}$,
+\item $a \diffen b = 0 \Rightarrow \tempn{a} = \tempn{b}$,
+\item $a \diffen b < 0 \Rightarrow \tempn{a} < \tempn{b}$.
+\end{itemize}
+\end{definicao}
+
+A operação de diferença de energia diz quais objetos rebecem e quais cedem energia a fim de estabelecer equilíbrio térmico: para $a \diffen b > 0$, $a$ deve ceder energia a $b$ (e $b$ receber energia de $a$) até que a relação $\trl{a}{b}$ seja satisfeita.
+
+A temperatura númerica usada em termometros é conseguida aplicando-se um valor em $\mathbb{R}$ à cada uma das classes de equivalência criadas por $\trls$, tal que a relação de ordem da temperatura é preservada.
+
+\begin{definicao}[Funtor temperatura de $\termo$ para $\mathbb{R}$] \label{def:funtemp}
+O funtor temperatura $T$ é tal que para dois objetos $a,b \in \obtermo$, se $\trl{a}{b}$, então os morfismos $a_\termo \to a_T$ e $b_\termo \to a_T$ são estabelecidos e $\mortermo$ são esquecidos, sendo $a_T$ um valor em $\mathbb{R}$, e o mapeamento respeita a ordem definida anteriormente (definição \ref{def:ordemtemp}).
+\end{definicao}
+
+A definição \ref{def:funtemp} pode ser obtida usando com um funtor que mapeia $\obtempn{a} \to \langle\obtempn{a}, a_T\rangle$ composto com o funtor esquecimento.
+
+\end{document}
