@@ -24,12 +24,19 @@
 \newcommand{\obtemp}{{\obtempn{n}}}
 \newcommand{\mortemp}{{\mortempn{n}}}
 \newcommand{\diffen}{{\ominus}}
+\newcommand{\conect}{{\mathbf{Conect}}}
+\newcommand{\morconect}{{\mathbf{Mor}_\conect}}
+\newcommand{\obconect}{{\mathbf{Ob}_\conect}}
 
 \newtheorem{definicao}{Definição}[section]
 
+\title{A lei zero da termodinâmica}
+\author{Thiago Rafael Becker}
+\date{Dezembro de 2011}
 \begin{document}
+\maketitle
 \begin{abstract}
-blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+Este artigo define o conceito de um sistema em equilíbrio térmico, antes definido textualmente, ou na melhor das hipóteses, em forma de equações diferenciais, com o uso de duas categorias e um equalizador de grafos completos. Também dá um sentido algébrico ao conceito de temperatura.
 \end{abstract}
 
 \section*{Introdução}
@@ -38,7 +45,11 @@ Se dois corpos $A$ e $C$ estãem equilíbrio térmico com um terceiro corpo $B$,
 \end{definicao}
 Uma consequêcia importante desta lei é o surgimento do conceito de temperatura: todos os objetos em equlíbrio térmico podem ser agrupados e marcados com um número que indica a temperatura deste conjunto. Este artigo estuda esta lei de acordo com a teoria de categorias.
 
-Neste artigo, {\it sistema} e {\it corpo} são usados alternadamente. Um sistema é composto um ou mais corpos, e as definições neste artigo aplicam-se indistintamente, exceto quando explicitamente declarado.
+\begin{definicao}[Sistema] \label{def:sistema}
+Um sistema é composto um ou mais corpos.
+\end{definicao}
+
+Neste artigo, {\it sistema} e {\it corpo} são usados alternadamente, e as definições neste artigo aplicam-se indistintamente, exceto quando explicitamente declarado.
 
 \section*{A relação $\trls$}
 Pela descrição da lei zero da termodinâmica é possível perceber que existe uma relação euclideana entre os corpos em equilíbrio térmico. A relação $\trls$ é definida para indicar a relação entre dois corpos em equilíbrio térmico.
@@ -91,9 +102,31 @@ A operação de diferença de energia diz quais objetos rebecem e quais cedem en
 A temperatura númerica usada em termometros é conseguida aplicando-se um valor em $\mathbb{R}$ à cada uma das classes de equivalência criadas por $\trls$, tal que a relação de ordem da temperatura é preservada.
 
 \begin{definicao}[Funtor temperatura de $\termo$ para $\mathbb{R}$] \label{def:funtemp}
-O funtor temperatura $T$ é tal que para dois objetos $a,b \in \obtermo$, se $\trl{a}{b}$, então os morfismos $a_\termo \to a_T$ e $b_\termo \to a_T$ são estabelecidos e $\mortermo$ são esquecidos, sendo $a_T$ um valor em $\mathbb{R}$, e o mapeamento respeita a ordem definida anteriormente (definição \ref{def:ordemtemp}).
+O funtor temperatura $T$ é tal que para dois objetos $a,b \in \obtermo$, se $\trl{a}{b}$, então os morfismos $a_\termo \to t_T$ e $b_\termo \to t_T$ são estabelecidos e $\mortermo$ são esquecidos, sendo $t_T$ um valor em $\mathbb{R}$, e o mapeamento respeita a ordem definida anteriormente (definição \ref{def:ordemtemp}).
 \end{definicao}
 
-A definição \ref{def:funtemp} pode ser obtida usando com um funtor que mapeia $\obtempn{a} \to \langle\obtempn{a}, a_T\rangle$ composto com o funtor esquecimento.
+A definição \ref{def:funtemp} pode ser obtida usando com um funtor que mapeia $a \to \langle a, t_T\rangle$ composto com o funtor esquecimento, composto com um funtor que mapeia $\langle a, b \rangle$ para dois conjunto tal que $b \in T \subset \mathbb{R}$ e $a \in \obtermo$, e cria os morfismos $a \to b$.
+
+\section*{Corpos e sistemas}
+Nesta seção, corpos e sistemas são tratados de forma distinta (a definição \ref{def:sistema} ainda se aplica.)
+
+Agora vamos definir um sistema em isolamento adiabático. Um dos problemas da definição de $\termo$ é que dois corpos podem estar em equilíbrio térmico (com a {\it possibilidade} de estar em equilíbrio) porém sem um meio possível de transferir o calor entre eles (sem a {\it capacidade} de trocar calor).
+
+Para definir um sistema com a possibilidade de trocar calor, devemos estabelecer entre eles uma conexão através de um meio capaz de transferir calor. Como calor é energia cinética, e energia cinética se propaga através da matéria, podemos definir que todos os corpos em contato com um fluído ou sólido são capazes de trocar calor. Algebricamente, estes objetos possuem uma relação de conexão.
+
+\begin{definicao}[Relação de conetividade de corpos capazes de troca de calor, $\omega$] \label{def:conect}
+Se um corpo $A$ é capaz de trocar calor com os corpos $B$ e $C$, $B$ e $C$ são capazes de trocar calor entre si (pelo meio $A$).
+\end{definicao}
+
+A possui as mesmas características de $\trls$, e desta forma forma, pode ser visto como uma categoria $\conect$.
+\begin{equation} \label{eq:conect}
+\conect = \langle \obconect, \morconect, \delta_0, z\delta_1, id, \circ \rangle
+\end{equation}
+O shape desta categoria é um multigrafo cujos subgrafos são completamente conexos.
+
+Se definirmos que $\obtermo = \obconect$, podemos estabelecer um equalizador entre $\trls$ e $\omega$. Este equalizador mapeia todos os corpos em equilíbrio térmico e que também são conexos por $\omega$, e podemos denominar os elementos de cada equalizador de um {\it sistema em equilíbrio térmico}. Quando o equalizador é exatamente igual ao subgrafo em $\obconect$, este equilíbrio é denominado {\it abiabático} devido a impossibilidade de trocar calor com qualquer outro meio.
+
+\section*{Conclusão}
+As categorias e métodos aqui usados servem para definir algebricamente algo que antes era definido apenas textualmente em livros de física. Através da definição categorias de relações entre corpos, e posteriormente um equalizador entre estas duas relações, conseguimos definir o que é um sistema em equilíbrio térmico e em equilíbrio adiabático. O uso de técnicas semelhantes pode ser útil para definir outros construtos puramente textuais.
 
 \end{document}
